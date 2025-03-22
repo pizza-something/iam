@@ -1,7 +1,7 @@
 [project]
 name = "iam"
 version = "0.1.0"
-description = "*description*"
+description = "Микросервис управления учётными данными "
 authors = [
     {name = "Alexander Smolin", email = "88573504+emptybutton@users.noreply.github.com"}
 ]
