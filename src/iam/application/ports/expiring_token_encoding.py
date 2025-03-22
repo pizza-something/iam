@@ -5,9 +5,9 @@ from iam.entities.access.expiring_token import ExpiringToken
 
 class ExpiringTokenEncoding[TokenT: ExpiringToken, EncodedTokenT](ABC):
     @abstractmethod
-    async def encoded(self, token: TokenT) -> EncodedTokenT: ...
+    async def encoded(self, token: TokenT, /) -> EncodedTokenT: ...
 
     @abstractmethod
     async def decoded(
-        self, encoded_token: EncodedTokenT
+        self, encoded_token: EncodedTokenT, /
     ) -> TokenT | None: ...
