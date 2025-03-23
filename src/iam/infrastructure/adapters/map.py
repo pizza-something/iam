@@ -3,7 +3,11 @@ from collections.abc import Sequence
 from psycopg.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
 
-from iam.application.ports.map import MapTo, NotUniqueAccountNameError, StoredEntityLifeCycle
+from iam.application.ports.map import (
+    MapTo,
+    NotUniqueAccountNameError,
+    StoredEntityLifeCycle,
+)
 from iam.infrastructure.sqlalchemy.driver import (
     PostgresDriver,
     single_session_of,
