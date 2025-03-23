@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from iam.entities.access.expiring_token import ExpiringToken
+from iam.entities.access.token import ExpiringToken
 
 
 class ExpiringTokenEncoding[TokenT: ExpiringToken, EncodedTokenT](ABC):

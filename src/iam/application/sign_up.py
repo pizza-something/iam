@@ -14,10 +14,9 @@ from iam.application.ports.expiring_token_encoding import (
 )
 from iam.application.ports.map import MapTo
 from iam.application.ports.transaction import TransactionOf
-from iam.entities.access.access_token import AccessToken
 from iam.entities.access.account import AccountName
 from iam.entities.access.password import Password, PasswordHashing
-from iam.entities.access.refresh_token import RefreshToken
+from iam.entities.access.token import AccessToken, RefreshToken
 from iam.entities.access.user import signed_up_user_when
 
 
@@ -37,7 +36,7 @@ class SignUp[
     access_token_encoding: ExpiringTokenEncoding[
         AccessToken, EncodedAccessTokenT
     ]
-    refreh_token_encoding: ExpiringTokenEncoding[
+    refresh_token_encoding: ExpiringTokenEncoding[
         RefreshToken, EncodedRefreshTokenT
     ]
     accounts: AccountsT
@@ -77,10 +76,10 @@ class SignUp[
                 await self.event_queue.push(event)
 
         encoded_access_token = await self.access_token_encoding.encoded(
-            just(signed_up_user).access_token
+            just(signed_up_user).session.access_token
         )
-        encoded_refresh_token = await self.refreh_token_encoding.encoded(
-            just(signed_up_user).refresh_token
+        encoded_refresh_token = await self.refresh_token_encoding.encoded(
+            just(signed_up_user).session.refresh_token
         )
         return Output(
             encoded_access_token=encoded_access_token,

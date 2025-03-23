@@ -2,29 +2,24 @@ from dataclasses import dataclass
 
 from effect import Effect, just
 
-from iam.entities.access.access_token import (
-    AccessToken,
-    new_access_token_when,
-    refreshed,
-)
 from iam.entities.access.account import (
     Account,
     AccountName,
     registered_account_when,
 )
-from iam.entities.access.expiring_token import InvalidTokenError, valid
 from iam.entities.access.password import Password, PasswordHashing
-from iam.entities.access.refresh_token import (
-    RefreshToken,
-    new_refreh_token_when,
+from iam.entities.access.session import (
+    Session,
+    extended,
+    is_active,
+    new_session_when,
 )
 from iam.entities.time.time import Time
 
 
 @dataclass(kw_only=True, frozen=True)
 class SignedUpUser:
-    refresh_token: RefreshToken
-    access_token: AccessToken
+    session: Session
 
 
 def signed_up_user_when(
@@ -39,15 +34,12 @@ def signed_up_user_when(
         account_name=account_name,
         password=password,
     )
-    signed_up_user = SignedUpUser(
-        refresh_token=new_refreh_token_when(
-            current_time=current_time, account_id=just(account).id
-        ),
-        access_token=new_access_token_when(
-            current_time=current_time, account_id=just(account).id
+
+    return account.map(lambda _: SignedUpUser(
+        session=new_session_when(
+            account_id=just(account).id, current_time=current_time
         )
-    )
-    return account.map(lambda _: signed_up_user)
+    ))
 
 
 type PrimaryAuthenticatedUser = None
@@ -79,8 +71,7 @@ def primary_authenticated_user_when(
 
 @dataclass(kw_only=True, frozen=True)
 class SignedInUser:
-    refresh_token: RefreshToken
-    access_token: AccessToken
+    session: Session
 
 
 class InvalidPasswordForSignedInUserError(Exception): ...
@@ -100,36 +91,32 @@ def signed_in_user_when(
     primary_authenticated_user_when(
         account=account, password=password, password_hashing=password_hashing
     )
+    session = new_session_when(account_id=account.id, current_time=current_time)
 
-    return SignedInUser(
-        refresh_token=new_refreh_token_when(
-            current_time=current_time, account_id=account.id
-        ),
-        access_token=new_access_token_when(
-            current_time=current_time, account_id=account.id
-        )
-    )
+    return SignedInUser(session=session)
 
 
 @dataclass(kw_only=True, frozen=True)
-class UserWithRefreshedAccessToken:
-    access_token: AccessToken
+class UserWithExtendedSession:
+    session: Session
 
 
-def user_with_refreshed_access_token_when(
+class NotActiveSessionForUserWithExtendedSessionError(Exception): ...
+
+
+def user_with_extended_session_when(
     *,
     current_time: Time,
-    refresh_token: RefreshToken | None,
-    access_token: AccessToken | None,
-) -> UserWithRefreshedAccessToken:
+    session: Session,
+) -> UserWithExtendedSession:
     """
-    :raises iam.entities.access.token.InvalidTokenError:
-    """
+    :raises iam.entities.access.user.NotActiveSessionForUserWithExtendedSessionError:
+    :raises iam.entities.access.session.NotExtendableSessionForExtendedSessionError:
+    """  # noqa: E501
 
-    if access_token is None:
-        raise InvalidTokenError
+    if not is_active(session, current_time=current_time):
+        raise NotActiveSessionForUserWithExtendedSessionError
 
-    refresh_token = valid(refresh_token, current_time=current_time)
-    access_token = refreshed(access_token, current_time=current_time)
-
-    return UserWithRefreshedAccessToken(access_token=access_token)
+    return UserWithExtendedSession(
+        session=extended(session, current_time=current_time),
+    )
