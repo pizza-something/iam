@@ -17,6 +17,7 @@ from iam.application.ports.map import MapTo
 from iam.application.ports.transaction import TransactionOf
 from iam.application.sign_in import SignIn
 from iam.application.sign_up import SignUp
+from iam.entities.access.password import PasswordHashing
 from iam.entities.access.token import AccessToken, RefreshToken
 from iam.infrastructure.adapters.accounts import InPostgresAccounts
 from iam.infrastructure.adapters.clock import LocalHostClock
@@ -26,6 +27,7 @@ from iam.infrastructure.adapters.expiring_token_encoding import (
     RefreshTokenEncodingToHS256JWT,
 )
 from iam.infrastructure.adapters.map import MapToPostgres
+from iam.infrastructure.adapters.password_hashing import BcryptPasswordHashing
 from iam.infrastructure.adapters.transaction import (
     InPostgresTransactionOf,
 )
@@ -114,6 +116,15 @@ class ApplicationProvider(Provider):
         MapTo[tuple[InPostgresAccounts]],
     ]:
         return MapToPostgres()
+
+    @provide(scope=Scope.APP)
+    def provide_password_hashing(
+        self
+    ) -> AnyOf[
+        BcryptPasswordHashing,
+        PasswordHashing,
+    ]:
+        return BcryptPasswordHashing()
 
     provide_sign_in = provide(
         SignIn[JWT, JWT, InPostgresAccounts],
