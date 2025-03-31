@@ -46,6 +46,7 @@ build-backend = "hatchling.build"
 packages = ["src/iam"]
 
 [tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src:$MYPY_CONFIG_FILE_DIR/tests"
 strict = true
 no_namespace_packages = true
 allow_redefinition = true
