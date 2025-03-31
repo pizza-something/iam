@@ -24,5 +24,5 @@ class ShortPasswordSchema(ErrorSchema):
     type: Literal["shortPassword"] = "shortPassword"
 
 
-class AccessDeniedSchema(ErrorSchema):
-    type: Literal["accessDenied"] = "accessDenied"
+class NotAuthenticatedSchema(ErrorSchema):
+    type: Literal["notAuthenticated"] = "notAuthenticated"

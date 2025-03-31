@@ -55,6 +55,7 @@ async def app_from(container: AsyncContainer) -> FastAPI:
     app = _FastAPIWithAdditionalModels(
         title=repo_name,
         version=version,
+        summary="Микросервис управления учётными данными.",
         openapi_tags=tags_metadata,
         contact={"name": "Alexander Smolin", "url": author_url},
         license_info={

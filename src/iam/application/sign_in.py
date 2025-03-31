@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from iam.application.errors.access import AccessDeniedError
+from iam.application.errors.access import NotAuthenticatedError
 from iam.application.ports.accounts import Accounts
 from iam.application.ports.clock import Clock
 from iam.application.ports.expiring_token_encoding import (
@@ -50,7 +50,7 @@ class SignIn[
         password_text: str,
     ) -> Output[EncodedAccessTokenT, EncodedRefreshTokenT]:
         """
-        :raises iam.apploication.errors.access.AccessDeniedError:
+        :raises iam.application.errors.access.NotAuthenticatedError:
         """
 
         current_time = await self.clock.get_current_time()
@@ -58,18 +58,18 @@ class SignIn[
         try:
             account_name = AccountName(text=account_name_text)
         except EmptyAccountNameError as error:
-            raise AccessDeniedError from error
+            raise NotAuthenticatedError from error
 
         try:
             password = Password(text=password_text)
         except ShortPasswordError as error:
-            raise AccessDeniedError from error
+            raise NotAuthenticatedError from error
 
         async with self.transaction_of((self.accounts, )):
             account = await self.accounts.account_with_name(account_name)
 
         if account is None:
-            raise AccessDeniedError
+            raise NotAuthenticatedError
 
         try:
             signed_in_user = signed_in_user_when(
@@ -79,7 +79,7 @@ class SignIn[
                 account=account,
             )
         except InvalidPasswordForPrimaryAuthenticatedUserError as error:
-            raise AccessDeniedError from error
+            raise NotAuthenticatedError from error
 
         encoded_access_token = await self.access_token_encoding.encoded(
             signed_in_user.session.access_token

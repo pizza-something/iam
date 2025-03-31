@@ -44,7 +44,7 @@ class SignUpSchema(BaseModel):
             ),
         },
     },
-    summary="Sign up.",
+    summary="Sign up",
     description="Register an account of a current user.",
     tags=[Tag.user, Tag.account],
 )

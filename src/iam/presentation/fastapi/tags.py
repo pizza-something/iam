@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Tag(Enum):
-    user = "Current user endpoints."
+    user = "Current user"
     account = "Account"
     session = "Session"
     monitoring = "Monitoring"

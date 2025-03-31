@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from iam.application.errors.access import AccessDeniedError
+from iam.application.errors.access import NotAuthenticatedError
 from iam.application.ports.clock import Clock
 from iam.application.ports.expiring_token_encoding import (
     ExpiringTokenEncoding,
@@ -38,12 +38,15 @@ class ExtendSession[
 
     async def __call__(
         self,
-        encoded_access_token: EncodedAccessTokenT,
-        encoded_refresh_token: EncodedRefreshTokenT,
+        encoded_access_token: EncodedAccessTokenT | None,
+        encoded_refresh_token: EncodedRefreshTokenT | None,
     ) -> Output[EncodedAccessTokenT, EncodedRefreshTokenT]:
         """
-        :raises iam.apploication.errors.access.AccessDeniedError:
+        :raises iam.application.errors.access.NotAuthenticatedError:
         """
+
+        if encoded_access_token is None or encoded_refresh_token is None:
+            raise NotAuthenticatedError
 
         current_time = await self.clock.get_current_time()
 
@@ -55,7 +58,7 @@ class ExtendSession[
         )
 
         if access_token is None or refresh_token is None:
-            raise AccessDeniedError
+            raise NotAuthenticatedError
 
         session = Session(
             access_token=access_token,
@@ -68,9 +71,9 @@ class ExtendSession[
                 session=session,
             )
         except NotActiveSessionForUserWithExtendedSessionError as error:
-            raise AccessDeniedError from error
+            raise NotAuthenticatedError from error
         except NotExtendableSessionForExtendedSessionError as error:
-            raise AccessDeniedError from error
+            raise NotAuthenticatedError from error
 
         encoded_access_token = await self.access_token_encoding.encoded(
             user.session.access_token

@@ -3,7 +3,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
-from iam.application.errors.access import AccessDeniedError
+from iam.application.errors.access import NotAuthenticatedError
 from iam.application.sign_in import SignIn
 from iam.infrastructure.pydantic.schemas.common import NoDataSchema
 from iam.presentation.fastapi.cookies import (
@@ -12,7 +12,7 @@ from iam.presentation.fastapi.cookies import (
 )
 from iam.presentation.fastapi.fields import name_field, password_field
 from iam.presentation.fastapi.schemas.errors import (
-    AccessDeniedSchema,
+    NotAuthenticatedSchema,
     ErrorListSchema,
 )
 from iam.presentation.fastapi.tags import Tag
@@ -31,10 +31,10 @@ class SignInSchema(BaseModel):
     responses={
         status.HTTP_201_CREATED: {"model": NoDataSchema},
         status.HTTP_401_UNAUTHORIZED: {
-            "model": ErrorListSchema[AccessDeniedSchema]
+            "model": ErrorListSchema[NotAuthenticatedSchema]
         },
     },
-    summary="Sign in.",
+    summary="Sign in",
     description="Create a new session for a current user.",
     tags=[Tag.user, Tag.account, Tag.session],
 )
@@ -50,8 +50,8 @@ async def sign_in_route(
             request_body.name,
             request_body.password,
         )
-    except AccessDeniedError:
-        response_body_model = AccessDeniedSchema().to_list()
+    except NotAuthenticatedError:
+        response_body_model = NotAuthenticatedSchema().to_list()
         response_body = response_body_model.model_dump(by_alias=True)
         status_code = status.HTTP_401_UNAUTHORIZED
         return JSONResponse(response_body, status_code=status_code)

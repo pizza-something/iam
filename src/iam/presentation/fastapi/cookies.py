@@ -45,9 +45,7 @@ class CookieAnnotationKeeperType(type):
         ]  # type: ignore[assignment]
         type_.StrWithLock = Annotated[str, Depends(api_key_with_auto_error)]  # type: ignore[assignment]
 
-        type_.StrOrNone = Annotated[
-            str | None, FastAPICookie(alias=key, default=None)
-        ]  # type: ignore[assignment]
+        type_.StrOrNone = Annotated[str | None, FastAPICookie(alias=key)]  # type: ignore[assignment]
         type_.Str = Annotated[str, FastAPICookie(alias=key)]  # type: ignore[assignment]
 
         type_.key = key
@@ -78,7 +76,10 @@ class AccessTokenCookie(
     metaclass=CookieAnnotationKeeperType,
     key="accessToken",
     scheme_name="Access token cookie",
-    description="Required for various operations. Obtained after registration.",
+    description=(
+        "Required for various operations."
+        " Obtained after signing in or signing up."
+    ),
 ):
     type StrOrNoneWithLock = str | None
     type StrWithLock = str
@@ -91,7 +92,10 @@ class RefreshTokenCookie(
     metaclass=CookieAnnotationKeeperType,
     key="refreshToken",
     scheme_name="Refresh token cookie",
-    description="Required to refresh access tokens. Obtained after signing in.",
+    description=(
+        "Required to refresh access tokens."
+        " Obtained after signing in or signing up."
+    ),
 ):
     type StrOrNoneWithLock = str | None
     type StrWithLock = str
