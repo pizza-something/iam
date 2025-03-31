@@ -16,8 +16,8 @@ class EmptyAccountNameSchema(ErrorSchema):
     type: Literal["emptyAccountName"] = "emptyAccountName"
 
 
-class NotUniqueAccountNameSchema(ErrorSchema):
-    type: Literal["notUniqueAccountName"] = "notUniqueAccountName"
+class AccountNameTakenSchema(ErrorSchema):
+    type: Literal["accountNameTaken"] = "accountNameTaken"
 
 
 class ShortPasswordSchema(ErrorSchema):

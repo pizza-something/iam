@@ -1,4 +1,4 @@
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterable, AsyncIterator
 
 from dishka import AnyOf, Provider, Scope, provide
 from faststream.kafka import KafkaBroker
@@ -56,8 +56,9 @@ class ApplicationProvider(Provider):
     @provide(scope=Scope.APP)
     async def provide_kafka_broker(
         self, envs: RuntimeEnvs
-    ) -> KafkaBroker:
-        return KafkaBroker(envs.kafka_url)
+    ) -> AsyncIterable[KafkaBroker]:
+        async with KafkaBroker(envs.kafka_url) as broker:
+            yield broker
 
     provide_kafka_publisher_registry = provide(
         KafkaPublisherRegistry, scope=Scope.APP
@@ -73,7 +74,9 @@ class ApplicationProvider(Provider):
     async def provide_postgres_session(
         self, engine: PostgresEngine
     ) -> AsyncIterator[PostgresSession]:
-        session = AsyncSession(engine, autoflush=False, autobegin=False)
+        session = AsyncSession(
+            engine, autoflush=False, autobegin=False, expire_on_commit=False
+        )
         async with session:
             yield session
 

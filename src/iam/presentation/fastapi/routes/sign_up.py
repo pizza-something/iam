@@ -3,7 +3,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
-from iam.application.ports.map import NotUniqueAccountNameError
+from iam.application.errors.access import AccountNameTakenError
 from iam.application.sign_up import SignUp
 from iam.entities.access.account import EmptyAccountNameError
 from iam.entities.access.password import ShortPasswordError
@@ -14,9 +14,9 @@ from iam.presentation.fastapi.cookies import (
 )
 from iam.presentation.fastapi.fields import name_field, password_field
 from iam.presentation.fastapi.schemas.errors import (
+    AccountNameTakenSchema,
     EmptyAccountNameSchema,
     ErrorListSchema,
-    NotUniqueAccountNameSchema,
     ShortPasswordSchema,
 )
 from iam.presentation.fastapi.tags import Tag
@@ -35,7 +35,7 @@ class SignUpSchema(BaseModel):
     responses={
         status.HTTP_201_CREATED: {"model": NoDataSchema},
         status.HTTP_409_CONFLICT: {
-            "model": ErrorListSchema[NotUniqueAccountNameSchema],
+            "model": ErrorListSchema[AccountNameTakenSchema],
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": (
@@ -70,8 +70,8 @@ async def sign_up_route(
         response_body = response_body_model.model_dump(by_alias=True)
         status_code = status.HTTP_400_BAD_REQUEST
         return JSONResponse(response_body, status_code=status_code)
-    except NotUniqueAccountNameError:
-        response_body_model = NotUniqueAccountNameSchema().to_list()
+    except AccountNameTakenError:
+        response_body_model = AccountNameTakenSchema().to_list()
         response_body = response_body_model.model_dump(by_alias=True)
         status_code = status.HTTP_409_CONFLICT
         return JSONResponse(response_body, status_code=status_code)

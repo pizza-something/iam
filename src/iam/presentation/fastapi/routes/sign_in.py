@@ -12,8 +12,8 @@ from iam.presentation.fastapi.cookies import (
 )
 from iam.presentation.fastapi.fields import name_field, password_field
 from iam.presentation.fastapi.schemas.errors import (
-    NotAuthenticatedSchema,
     ErrorListSchema,
+    NotAuthenticatedSchema,
 )
 from iam.presentation.fastapi.tags import Tag
 

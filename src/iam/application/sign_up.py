@@ -3,6 +3,7 @@ from typing import Any
 
 from effect import just
 
+from iam.application.errors.access import AccountNameTakenError
 from iam.application.ports.accounts import Accounts
 from iam.application.ports.clock import Clock
 from iam.application.ports.event_queue import (
@@ -12,7 +13,7 @@ from iam.application.ports.event_queue import (
 from iam.application.ports.expiring_token_encoding import (
     ExpiringTokenEncoding,
 )
-from iam.application.ports.map import MapTo
+from iam.application.ports.map import MapTo, NotUniqueAccountNameError
 from iam.application.ports.transaction import TransactionOf
 from iam.entities.access.account import AccountName
 from iam.entities.access.password import Password, PasswordHashing
@@ -53,7 +54,7 @@ class SignUp[
         """
         :raises iam.entities.access.account.EmptyAccountNameError:
         :raises iam.entities.access.password.ShortPasswordError:
-        :raises iam.application.ports.map.NotUniqueAccountNameError:
+        :raises iam.application.errors.access.AccountNameTakenError:
         """
 
         current_time = await self.clock.get_current_time()
@@ -69,7 +70,10 @@ class SignUp[
         )
 
         async with self.transaction_of((self.accounts, )):
-            await self.map_to((self.accounts, ), signed_up_user)
+            try:
+                await self.map_to((self.accounts, ), signed_up_user)
+            except NotUniqueAccountNameError as error:
+                raise AccountNameTakenError() from error
 
             for account in signed_up_user.new_values:
                 event = AccountCreatedEvent(account=account)

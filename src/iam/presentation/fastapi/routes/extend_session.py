@@ -12,8 +12,8 @@ from iam.presentation.fastapi.cookies import (
     RefreshTokenCookie,
 )
 from iam.presentation.fastapi.schemas.errors import (
-    NotAuthenticatedSchema,
     ErrorListSchema,
+    NotAuthenticatedSchema,
 )
 from iam.presentation.fastapi.tags import Tag
 

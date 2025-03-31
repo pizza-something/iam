@@ -6,6 +6,7 @@ from sqlalchemy.orm import (
 )
 
 from iam.entities.access.account import Account, AccountName
+from iam.entities.access.password import PasswordHash
 from iam.infrastructure.sqlalchemy.tables import account_table, metadata
 
 
@@ -26,6 +27,13 @@ mapper_registry.map_imperatively(
         name=composite(
             lambda text: AccountName(text=cast(str, text)),
             account_table.c.name_text,
-        )
+        ),
+        password_hash=composite(
+            lambda text: PasswordHash(text=cast(str, text)),
+            account_table.c.password_hash_text,
+        ),
     ),
 )
+
+_mutable(AccountName).__composite_values__ = lambda self: (self.text,)  # type: ignore[attr-defined]
+_mutable(PasswordHash).__composite_values__ = lambda self: (self.text,)  # type: ignore[attr-defined]

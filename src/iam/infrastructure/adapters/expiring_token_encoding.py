@@ -33,7 +33,7 @@ class AccessTokenEncodingToHS256JWT(
     secret: str = field(repr=False)
 
     async def encoded(self, token: AccessToken, /) -> JWT:
-        payload = {"account_id": token.account_id}
+        payload = {"account_id": token.account_id.hex}
         headers = {"exp": token.expiration_time.datetime.isoformat()}
         algorithm = "HS256"
 
